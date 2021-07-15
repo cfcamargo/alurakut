@@ -62,11 +62,7 @@ function ProfileRelationBox(propriedades) {
 export default function Home() {
 
   const usuarioAleatorio = 'cfcamargo';
-  const [comunidades, setComunidades] = React.useState([{
-    id: '35671352165732155312',
-    title: 'Eu odeio acordar cedo',
-    image: 'https://alurakut.vercel.app/capa-comunidade-01.jpg',
-  }]);
+  const [comunidades, setComunidades] = React.useState([]);
   //const comunidades = comunidades[0];
   //const alteradorDeComunidades/setComunidades = comunidades[1];
 
@@ -83,6 +79,7 @@ export default function Home() {
   const [seguidores, setSeguidores] = React.useState([])
 
   React.useEffect(function () {
+    //GET
     fetch('https://api.github.com/users/peas/followers')
       .then(function (respostadoServidor) {
         return respostadoServidor.json();
@@ -90,6 +87,35 @@ export default function Home() {
       .then(function (respostaCompleta) {
         setSeguidores(respostaCompleta);
       })
+
+    // API GraphQL
+    fetch('https://graphql.datocms.com/', {
+      method: 'POST',
+      headers: {
+        'Authorization': '5706a3ef1bbb8f5f85518e769c1aca',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        "query": `query {
+        allCommunities {
+          title
+          id
+          imageUrl
+          creatorSlug
+        }
+      }`})
+    })
+
+      .then((response) => response.json())
+
+      .then((respostaCompleta) => {
+        const comunidadesVindaDoDato = respostaCompleta.data.allCommunities;
+        console.log(comunidades)
+        setComunidades(comunidadesVindaDoDato)
+
+      })
+
   }, [])
 
   return (
@@ -171,8 +197,8 @@ export default function Home() {
               {comunidades.map((itemAtual) => {
                 return (
                   <li key={itemAtual.id}>
-                    <a href={`/users/${itemAtual.title}`}>
-                      <img src={itemAtual.image} />
+                    <a href={`/communities/${itemAtual.title}`}>
+                      <img src={itemAtual.imageUrl} />
                       <span>{itemAtual.title}</span>
                     </a>
 
